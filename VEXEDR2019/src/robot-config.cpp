@@ -8,12 +8,19 @@ using code = vision::code;
 brain  Brain;
 
 // VEXcode device constructors
-motor LeftDriveSmart = motor(PORT1, ratio18_1, false);
-motor RightDriveSmart = motor(PORT2, ratio18_1, true);
-drivetrain Drivetrain = drivetrain(LeftDriveSmart, RightDriveSmart, 319.19, 295, 165, mm, 1);
-motor ClawMotor = motor(PORT3, ratio18_1, false);
-motor ArmMotor = motor(PORT4, ratio18_1, false);
 controller Controller1 = controller(primary);
+motor leftMotorA = motor(PORT2, ratio18_1, false);
+motor leftMotorB = motor(PORT7, ratio18_1, false);
+motor_group LeftDriveSmart = motor_group(leftMotorA, leftMotorB);
+
+motor rightMotorA = motor(PORT1, ratio18_1, true); 
+motor rightMotorB = motor(PORT6, ratio18_1, true); 
+motor_group RightDriveSmart = motor_group(rightMotorA, rightMotorB);
+
+drivetrain Drivetrain = drivetrain(LeftDriveSmart, RightDriveSmart, 319.19, 295, 165, mm, 1);
+motor Arm = motor(PORT3, ratio18_1, false);
+motor Arm2 = motor(PORT4, ratio18_1, false);
+motor Claw = motor(PORT5, ratio18_1, false);
 
 // VEXcode generated functions
 // define variable for remote controller enable/disable
@@ -21,6 +28,7 @@ bool RemoteControlCodeEnabled = true;
 // define variables used for controlling motors based on controller inputs
 bool Controller1LeftShoulderControlMotorsStopped = true;
 bool Controller1RightShoulderControlMotorsStopped = true;
+bool Controller1XBButtonsControlMotorsStopped = true;
 bool DrivetrainLNeedsToBeStopped_Controller1 = true;
 bool DrivetrainRNeedsToBeStopped_Controller1 = true;
 
@@ -71,29 +79,40 @@ int rc_auto_loop_callback_Controller1() {
         RightDriveSmart.setVelocity(drivetrainRightSideSpeed, percent);
         RightDriveSmart.spin(forward);
       }
-      // check the ButtonL1/ButtonL2 status to control ArmMotor
+      // check the ButtonL1/ButtonL2 status to control Arm
       if (Controller1.ButtonL1.pressing()) {
-        ArmMotor.spin(forward);
+        Arm.spin(forward);
         Controller1LeftShoulderControlMotorsStopped = false;
       } else if (Controller1.ButtonL2.pressing()) {
-        ArmMotor.spin(reverse);
+        Arm.spin(reverse);
         Controller1LeftShoulderControlMotorsStopped = false;
       } else if (!Controller1LeftShoulderControlMotorsStopped) {
-        ArmMotor.stop();
+        Arm.stop();
         // set the toggle so that we don't constantly tell the motor to stop when the buttons are released
         Controller1LeftShoulderControlMotorsStopped = true;
       }
-      // check the ButtonR1/ButtonR2 status to control ClawMotor
+      // check the ButtonR1/ButtonR2 status to control Arm2
       if (Controller1.ButtonR1.pressing()) {
-        ClawMotor.spin(forward);
+        Arm2.spin(forward);
         Controller1RightShoulderControlMotorsStopped = false;
       } else if (Controller1.ButtonR2.pressing()) {
-        ClawMotor.spin(reverse);
+        Arm2.spin(reverse);
         Controller1RightShoulderControlMotorsStopped = false;
       } else if (!Controller1RightShoulderControlMotorsStopped) {
-        ClawMotor.stop();
+        Arm2.stop();
         // set the toggle so that we don't constantly tell the motor to stop when the buttons are released
         Controller1RightShoulderControlMotorsStopped = true;
+      }
+      // check the X/B buttons status to control Claw
+      if (Controller1.ButtonX.pressing()) {
+        Claw.spin(forward);
+        Controller1XBButtonsControlMotorsStopped = false;
+      } else if (Controller1.ButtonB.pressing()) {
+        Claw.spin(reverse);
+        Controller1XBButtonsControlMotorsStopped = false;
+      } else if (!Controller1XBButtonsControlMotorsStopped){
+        Claw.stop();
+        Controller1XBButtonsControlMotorsStopped = true;
       }
     }
     // wait before repeating the process
